@@ -1,0 +1,5 @@
+package GalacticCats;
+//공격자들(외계인,새),기타 (코인,파워,ph물약)
+public class HoriaontallyMoving {
+
+}

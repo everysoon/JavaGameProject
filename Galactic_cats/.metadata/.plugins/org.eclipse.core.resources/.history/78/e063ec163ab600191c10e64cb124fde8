@@ -1,0 +1,13 @@
+package GalacticCats;
+
+import java.net.URL;
+
+//stoneµé
+public class DiagonallyMoving extends Moving {
+
+	public DiagonallyMoving(URL imgURL, int margin, int xBoundary, int yBoundary) {
+		super(imgURL, margin, xBoundary, yBoundary);
+
+	}
+
+}

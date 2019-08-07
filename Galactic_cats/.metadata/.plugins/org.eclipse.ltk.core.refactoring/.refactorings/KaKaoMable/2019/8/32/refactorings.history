@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring accessors="true" comment="Delete element from project &apos;KaKaoMable&apos;&#x0D;&#x0A;- Original project: &apos;KaKaoMable&apos;&#x0D;&#x0A;- Original element: &apos;jlayer1.0.1&apos;" description="Delete element" element1="src/jlayer1.0.1" elements="0" flags="589830" id="org.eclipse.jdt.ui.delete" resources="1" stamp="1565178429247" subPackages="false" version="1.0"/>
+</session>

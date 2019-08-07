@@ -1,0 +1,170 @@
+package GalacticCats;
+
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.image.ImageObserver;
+import java.net.URL;
+
+import javax.swing.ImageIcon;
+
+public class Moving extends ImageIcon {
+	public int x;				// 모양의 위치 좌표
+	public int y;				// 모양의 위치 좌표
+	private int initX, initY; 	// 초기시작 x, y좌표
+	protected int xDirection;
+	protected int yDirection;
+	protected int xBoundary; //경계표시
+	protected int yBoundary; //경계표시 
+	protected int steps;
+	protected int margin;		// 이 모양의 영역이 포함되는 영역을 나타내기 위함
+	URL img;
+	URL attack_img;
+	URL attacked_img;
+	URL weapon;
+	
+	public Moving(URL imgURL,URL attack_img,URL attacked_img,URL weapon,int x, int y, int margin, int steps, int xBoundary, int yBoundary) {
+		// imgPath : 그림 파일의 경로명
+		// x, y : 이미지의 시작 위치 좌표
+		// margin : 이 이미지의 영역을 나타내는 범위 (이 영역안에 있으면 충돌 한 것으로 판단 하기 위함) ->이미지 크기 
+		// steps : 이미지가 움직일때 이동하는 좌표 단위
+		// xBoundary, yBoundary : 그림이 이동할 수 있는 좌표의 최대값
+		super (imgURL);
+		this.attack_img=attack_img;
+		this.attacked_img=attacked_img;
+		this.weapon=weapon;
+		this.x = x;
+		this.initX = x;
+		this.y = y;
+		this.initY = y;
+		this.margin = margin;
+		this.xDirection = 1;
+		this.yDirection = 1;
+		this.steps = steps;
+		this.xBoundary = xBoundary;
+		this.yBoundary = yBoundary;
+	}
+	//stone,ball,새 이미지 그리기 : (attack_img)없는 애들 
+	public Moving(URL imgURL,URL attacked,int margin,int xBoundary,int yBoundary) {
+		super(imgURL);
+		this.attacked_img=attacked;
+		this.margin=margin;
+		this.xBoundary=xBoundary;
+		this.yBoundary=yBoundary;
+	}
+	//ph포션,파워포션,코인 
+	public Moving(URL imgURL, int margin) {
+		super(imgURL);
+		this.margin=margin;
+	}
+	// 시작 위치를 임의의 포인트로 주는 구성자 
+	//적들 (attack이미지있는애들)
+	public Moving(URL imgURL,URL attacked_img,URL weapon,int margin, int steps, int xBoundary, int yBoundary) {
+		super(imgURL);
+		this.attack_img=attacked_img;
+		this.weapon=weapon;
+		this.margin=margin;
+		this.steps=steps;
+		this.xBoundary=xBoundary;
+		this.yBoundary=yBoundary;
+		x= (int) (Math.random() * xBoundary+500);
+		y= (int) (Math.random() * yBoundary+10);
+	}
+
+	// 시작위치를 주어진 바운더리 중앙에 위치시키는 구성자
+	public Moving(URL imgURL,URL attacked_img,URL weapon, int margin, int xBoundary, int yBoundary) {
+		this (imgURL,attacked_img,weapon,margin, margin, xBoundary, yBoundary);
+		x=xBoundary/2;
+		y=yBoundary;
+		
+	}
+
+	public void setX(int x) {
+		this.x = x;
+	}
+
+	public void setY(int y) {
+		this.y = y;
+	}
+
+	public int getX() {
+		return this.x;
+	}
+
+	public int getY() {
+		return this.y;
+	}
+	
+	public void setMargin(int margin) {
+		this.margin = margin;
+	}
+	
+	public int getMargin() {
+		return margin;
+	}
+	public URL getAttack_img() {
+		return attack_img;
+	}
+	public URL getAttacked_img() {
+		return attacked_img;
+	}
+	public URL getWeapon() {
+		return weapon;
+	}
+	public void setImg(URL img) {
+		this.img = img;
+	}
+	// 하나의 점이 이 모양과 충돌하였는지 (모양의 margin 거리안에 있는지)를 판단하는 함수
+	public boolean collide (Point p2) {
+		Point p = new Point(this.x, this.y);
+		if (p.distance(p2) <= margin) return true;
+		return false;
+	}
+	
+	public void reset() {
+		x = initX; y= initY;
+	}
+	
+	// 해당 모양을 g에 출력해주는 메소드
+	public void draw(Graphics g, ImageObserver io) {
+		((Graphics2D)g).drawImage(this.getImage(), x, y, margin, margin, io);
+	}
+	
+	public void Horizontallymove() {
+		if (xDirection > 0 && x >= xBoundary) {
+			xDirection = -1;
+			y += (yDirection * steps * 5);
+		}
+		if (xDirection < 0 && x <= 0) {
+			xDirection = 1;
+			y += (yDirection * steps * 5);
+		}
+		x += (xDirection * steps);
+
+		if (yDirection > 0 && y >= yBoundary) {
+			yDirection = -1;
+		}
+		if (yDirection < 0 && y <= 0) {
+			yDirection = 1;
+		}
+	}
+	//돌 
+	public void Diaonallymove() {
+
+		if (xDirection > 0 && x >= xBoundary) {
+			xDirection = -1;
+		}
+		if (xDirection < 0 && x <= 0) {
+			xDirection = 1;
+		}
+		x += (xDirection * steps);
+
+		if (yDirection > 0 && y >= yBoundary) {
+			yDirection = -1;
+		}
+		if (yDirection < 0 && y <= 0) {
+			yDirection = 1;
+		}
+		y += (yDirection * steps);
+	}
+}
