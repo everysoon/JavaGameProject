@@ -9,12 +9,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -32,18 +31,32 @@ public class Gamepanel extends JPanel{
 	final int OTHER_ATTACKER_INTERVAL= 5;
 	final int xB=1045;
 	final int yB=578;
+
 	Image buffImage;
 	Graphics buffg;
+
+	Image finishpanel =new ImageIcon("src/Image/finish.png").getImage();
 	Image startBackground=new ImageIcon("src/Image/startpanel.png").getImage();
-	Image gameBackground=new ImageIcon("src/Image/gameBackground.gif").getImage();
+	Image gameBackground=new ImageIcon("src/Image/gameBackground_.gif").getImage();
 	ImageIcon power_ing=new ImageIcon("src/Image/power_ing.gif");
 	ImageIcon power_full=new ImageIcon("src/Image/power_full.gif");
+	ImageIcon hero_attackImage =new ImageIcon("src/Image/hero_attacked.gif");
 	ImageIcon ph_4=new ImageIcon("src/Image/ph_full.png");
 	ImageIcon ph_3=new ImageIcon("src/Image/ph_2.png");
 	ImageIcon ph_2=new ImageIcon("src/Image/ph_3.png");
 	ImageIcon ph_1=new ImageIcon("src/Image/ph_4.png");
 	ImageIcon ph_0=new ImageIcon("src/Image/ph_5.png");
+	ImageIcon phBar =new ImageIcon(ph_4.getImage());
+	ImageIcon profile =new ImageIcon("src/Image/profile.png");
+	ImageIcon powergauge =new ImageIcon(power_ing.getImage());
+	ImageIcon attack_touched =new ImageIcon("src/Image/attack_touched.gif");
+	ImageIcon special_attack =new ImageIcon("src/Image/special_attack.gif");
 
+	ImageIcon hero_invincibility =new ImageIcon("src/Image/invincibility.gif");
+	ImageIcon hero_flybasic =new ImageIcon ();
+	ImageIcon hero_attackbasic =new ImageIcon();
+	ImageIcon hero_Attacked =new ImageIcon ();
+	ImageIcon hero_specialAttack =new ImageIcon("src/Image/special.gif");
 	ArrayList<Bullet> weapon=new ArrayList<Bullet>();
 	ArrayList<Bullet> Attacker_weapon=new ArrayList<Bullet>();
 	ArrayList<Moving> alian;
@@ -52,14 +65,10 @@ public class Gamepanel extends JPanel{
 	ArrayList<Moving> coinList;
 
 	JButton startButton =new JButton();
-	JLabel profile=new JLabel(new ImageIcon("src/Image/profile.png"));
-	JLabel nameLabel=new JLabel();
-	JLabel scoreLabel=new JLabel();
-	JLabel powergauge=new JLabel(power_ing);
-	JLabel coinLabel=new JLabel();
-	JLabel attack_touched=new JLabel(new ImageIcon("src/Image/attack_touched.gif"));
-	JLabel phBar=new JLabel(ph_4);
+	JButton reStartButton =new JButton();
+	JButton quitButton =new JButton();
 	ClockListener clockListener;
+
 	Timer goAnime;
 	Timer goScore;
 	Bullet coin;
@@ -67,12 +76,18 @@ public class Gamepanel extends JPanel{
 	Moving green;
 	Moving purple;
 	Moving yellow;
+
 	int score=0;
 	int randNum;
 	int coinNum=0;
 	int x=0;
 	int ph=4;
+
+	int invinceTimer =0;
+
 	String playerName;
+
+	boolean finished=false;
 	boolean space=false;
 	boolean start=false;
 	boolean power=false;
@@ -81,22 +96,32 @@ public class Gamepanel extends JPanel{
 	boolean downPushed=false;
 	boolean leftPushed=false;
 	boolean rightPushed=false;
+	boolean restart =false;
 
 	KeyListener tmp=new heroKeyEvent();
 
 	public Gamepanel() {
 		playerName=JOptionPane.showInputDialog("이름을 입력해주세요 :");
-		setupGUI();
+		setup();
 	}
-	public void setupGUI() {
-		coin=new Bullet(getClass().getResource("/Image/coin.gif"),980,65);
+	public void setup() {
+
 		setBounds(0,0,1155,688);
 		setLayout(null);
+
 		startButton.setBounds(230,550,680,100);
 		startButton.setBackground(Color.white);
 		startButton.setBorderPainted(false);
 		startButton.setOpaque(false);
 		startButton.addActionListener(new startButtonListener());
+
+		reStartButton.setBounds(420,390,140,40);
+		reStartButton.addActionListener(new reStartButtonListener());
+
+		quitButton.setBounds(600,390,140,40);
+		quitButton.addActionListener(new quitButtonListener());
+		add(reStartButton);
+		add(quitButton);
 		add(startButton);
 		prepareAttacker();
 		//캐릭터
@@ -106,38 +131,17 @@ public class Gamepanel extends JPanel{
 				getClass().getResource("/Image/basic_attack.gif"),
 				0,250,A_MARGIN,5,xB,yB);
 
+		hero_flybasic.setImage(new ImageIcon(hero.getImg()).getImage());
+		hero_attackbasic.setImage(new ImageIcon(hero.getAttack_img()).getImage());
+		hero_Attacked.setImage(new ImageIcon(hero.getAttacked_img()).getImage());;
+
 		//타이머
 		clockListener = new ClockListener();
 		goScore = new Timer(800, clockListener);			// 시간을 초단위로 나타내기 위한 리스너
 		goAnime = new Timer(SPEED, new AnimeListener());	// 그림의 이동을 처리하기 위한 리스너
-		//프로필 라벨 
-		phBar.setBounds(750,60, 240,55);
-		powergauge.setBounds(750,10,360,80);
-		coinLabel.setText("X"+coinNum);
-		coinLabel.setFont(new Font("Serif",Font.BOLD,25));
-		coinLabel.setBounds(1030,70,60,30);
-		nameLabel.setText(playerName);
-		nameLabel.setBounds(230,38,60,30);
-		scoreLabel.setText(String.valueOf(score));
-		scoreLabel.setFont(new Font("Serif",Font.BOLD,25));
-		scoreLabel.setBounds(240,65,100,50);
-		profile.setBounds(15,15,352,118);
-		profile.setVisible(false);
-		nameLabel.setVisible(false);
-		scoreLabel.setVisible(false);
-		coinLabel.setVisible(false);
-		powergauge.setVisible(false);
-		phBar.setVisible(false);
-		add(coinLabel);
-		add(powergauge);
-		add(nameLabel);
-		add(scoreLabel);
-		add(profile);
-		add(phBar);
-
 
 	}
-/*
+
 	//깜빡임 현상을 위한 더블버퍼링 구현 paint메소드와 screenDraw메소드 
 	public void paint(Graphics g) {
 		buffImage = createImage(1155, 688);
@@ -147,117 +151,78 @@ public class Gamepanel extends JPanel{
 	}
 	public void screenDraw(Graphics g) {
 
-		g.drawImage(startBackground,0,0,null); //첫 화면 
-
-		if(start) { //게임화면으로 전환
-			g.drawImage(gameBackground,x,0,null);
-			hero.draw(g,this);
-			for (Moving v : alian) {
-				v.draw(g,this);
-			}
-			for (Moving v : sbb) {
-				v.draw(g,this);
-			}
-			for(Moving m: coinList) {
-				m.draw(g,this);
-			}
-			coin.draw(g); //프로필코인
-	
-			if(space) {
-				System.out.println(""+space);
-				hero.setImg(hero.getAttack_img());
-				hero.draw(g,this);
-				hero.setImg(hero.getImg());
-				hero.draw(g,this);
-				space=false;
-				/*hero.setImage(new ImageIcon("src/Image/basic.gif").getImage());
-				space=false;
-				hero.setImage(new ImageIcon("src/Image/fly_basic.gif").getImage());
-				 
-			}
-			for(Bullet b:weapon) {
-				b.draw(g);
-				if(b.getX()>1155) {
-					weapon.remove(b);
-					break;
-				}
-				b.HeroMove();
-			}
-			if(attacked)
-				hero.setImg(hero.getAttacked_img());
-			for(Bullet b:Attacker_weapon) {
-				b.draw(g);
-				b.Attakcermove();
-				if(b.getX()>1155) {
-					Attacker_weapon.remove(b);
-				}
-			}
-		}
-
-		this.repaint();
-	}*/
-	public void paintComponent(Graphics g) {
-		
 		if(!start)g.drawImage(startBackground,0,0,null); //첫 화면 
-		else{ //게임화면으로 전환
+		else { //게임화면으로 전환
+
 			g.drawImage(gameBackground,x,0,null);
+			g.drawImage(phBar.getImage(),750,60,null);
+			g.drawImage(profile.getImage(),15,15,null);
+			g.drawImage(powergauge.getImage(),750,10,null);	
+			g.drawImage(new ImageIcon("src/Image/coin.gif").getImage(),980,65,50,50,null);
+			g.setColor(Color.BLACK);
+			g.setFont(new Font("Serif",Font.BOLD,25));
+			g.drawString("X"+coinNum,1030,100);
+			g.drawString(playerName,230,58);
+			g.drawString(String.valueOf(score),240,98);
+
 			hero.draw(g,this);
-			for (Moving v : alian) {
-				v.draw(g,this);
-			}
-			for (Moving v : sbb) {
-				v.draw(g,this);
+
+			for (Moving m : alian) {
+				m.draw(g,this);
+			}     
+			for (Moving m : sbb) {
+				m.draw(g,this);
 			}
 			for(Moving m: coinList) {
 				m.draw(g,this);
 			}
-			coin.draw(g); //프로필코인
-	
-			if(space) {
-				System.out.println(""+space);
-				hero.setImg(hero.getAttack_img());
-				hero.draw(g,this);
-				hero.setImg(hero.getImg());
-				hero.draw(g,this);
-				space=false;
-				/*hero.setImage(new ImageIcon("src/Image/basic.gif").getImage());
-				space=false;
-				hero.setImage(new ImageIcon("src/Image/fly_basic.gif").getImage());
-				 */
+			for(Moving m:item) {
+				m.draw(g,this);
 			}
 			for(Bullet b:weapon) {
-				b.draw(g);
-				if(b.getX()>1155) {
+				if(power) {
+					b.setImage(new ImageIcon("src/Image/special_attack.gif").getImage());
+					b.setBulletSize(140,95);
+					power=false;
+				}
+				else
+				{
+					b.draw(g);
+				}
+				if(b.outside_Hero()) {
 					weapon.remove(b);
 					break;
 				}
 				b.HeroMove();
 			}
-			if(attacked)
-				hero.setImg(hero.getAttacked_img());
+
 			for(Bullet b:Attacker_weapon) {
 				b.draw(g);
 				b.Attakcermove();
-				if(b.getX()>1155) {
+				if(b.outside_Attacker()) {
 					Attacker_weapon.remove(b);
+					break;
 				}
 			}
+			if(finished) {
+				g.drawImage(finishpanel,380,170,400,300,null);
+				g.drawString(playerName,650,220);
+				g.setFont(new Font("Serif",Font.BOLD,30));
+				g.drawString(playerName,440,360);
+				g.drawString(String.valueOf(score),660,290);
+			}
+
 		}
 
 		this.repaint();
 	}
+
 	public class startButtonListener implements ActionListener{
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			start=true;
-			startButton.setVisible(false);
-			profile.setVisible(true);
-			nameLabel.setVisible(true);
-			scoreLabel.setVisible(true);
-			coinLabel.setVisible(true);
-			powergauge.setVisible(true);
-			phBar.setVisible(true);
+			startButton.setVisible(false);	
 			prepareAttacker();
 			goScore.start();
 			goAnime.start();
@@ -266,7 +231,48 @@ public class Gamepanel extends JPanel{
 		}
 
 	}
+	public class reStartButtonListener implements ActionListener{
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			goAnime.restart();
+			goScore.restart();
+			finished=false;
+			for(Moving m : alian) {
+				m.reset();
+			}
+			for(Moving b : coinList) {
+				b.reset();
+			}
+			coinNum = 0;
+			ph = 4;
+			score = 0;
+			hero.setImage(hero_flybasic.getImage());
+			setPhbar(ph);
+			AttackerInit();
+			restart=true;
+			focus();
+		}
+
+	}
+	public class  quitButtonListener implements ActionListener{
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			System.exit(1);
+
+		}
+
+	}
+	public void focus() {
+		if(restart) {
+			System.out.println("restart포커스강제지정");
+			this.setFocusable(true);
+			this.requestFocus();
+		}
+	}
 	public void prepareAttacker() {
+
 		coinList=new ArrayList<Moving>();
 		item=new ArrayList<>();
 		alian=new ArrayList<>();
@@ -293,14 +299,19 @@ public class Gamepanel extends JPanel{
 		alian.add(yellow);
 
 		for(int i=0; i<3; i++) {
-			randNum=(int)(Math.random()*14)+13;
+			randNum=(int)(Math.random()*2)+13;
 			item.add(getRandomMoving(randNum));
+			System.out.println("item"+randNum+item);
 		}
 		for(int i=0; i<3; i++) {
-			randNum=(int)(Math.random()*12)+4;
+			randNum=(int)(Math.random()*9)+4;
 			sbb.add(getRandomMoving(randNum));
+			System.out.println("sbb"+randNum+sbb);
 		}
 
+		coinInit();
+	}
+	public void coinInit() {
 		for(int i=0; i<150; i+=30) {
 			coinList.add(getcoin(500+i,200));
 			coinList.add(getcoin(1000+i,400+i));
@@ -328,7 +339,6 @@ public class Gamepanel extends JPanel{
 		}
 
 	}
-
 	public class heroKeyEvent implements KeyListener{
 		@Override
 		public void keyPressed(KeyEvent e) {
@@ -337,20 +347,44 @@ public class Gamepanel extends JPanel{
 			switch(e.getKeyCode()) {
 			case KeyEvent.VK_UP:
 				upPushed = true;
+				if(hero.invincible)
+					hero.setImage(hero_invincibility.getImage());
+				else
+					hero.setImage(hero_flybasic.getImage());
 				break;
 			case KeyEvent.VK_DOWN:
 				downPushed = true;
+				if(hero.invincible)
+					hero.setImage(hero_invincibility.getImage());
+				else
+					hero.setImage(hero_flybasic.getImage());
 				break;
 			case KeyEvent.VK_LEFT:
 				leftPushed = true;
+				if(hero.invincible)
+					hero.setImage(hero_invincibility.getImage());
+				else
+					hero.setImage(hero_flybasic.getImage());
 				break;
 			case KeyEvent.VK_RIGHT:
 				rightPushed =true;
+				if(hero.invincible)
+					hero.setImage(hero_invincibility.getImage());
+				else
+					hero.setImage(hero_flybasic.getImage());
 				break;
 			case KeyEvent.VK_SPACE:
 				space=true;
-				weapon.add(new Bullet(hero.getBullet(),hero.x,hero.y));
+				weapon.add(new Bullet(hero.getBullet(),hero.x,hero.y));	
+				if(power) {
+					weapon.add(new Bullet(getClass().getResource("/Image/special_attack.gif"),hero.x,hero.y));
+					hero.setImage(hero_specialAttack.getImage());
+				}else {
+					hero.setImage(hero_flybasic.getImage());
+				}
 				break;	
+
+
 			}
 		}
 
@@ -376,6 +410,7 @@ public class Gamepanel extends JPanel{
 				rightPushed =false;
 				break;
 			case KeyEvent.VK_SPACE:
+				space =false;
 				break;
 			}
 
@@ -405,14 +440,13 @@ public class Gamepanel extends JPanel{
 			Attacker_weapon.add(new Bullet(green.getBullet(),green.getX(),green.getY()+green.getMargin()/2));
 			Attacker_weapon.add(new Bullet(purple.getBullet(),purple.getX(),purple.getY()+purple.getMargin()/2));
 			Attacker_weapon.add(new Bullet(yellow.getBullet(),yellow.getX(),yellow.getY()+yellow.getMargin()/2));
-			scoreLabel.setText(String.valueOf(score));
 			//코인개수 setText 해주기
 
-			if(score==30) power=true;
+			if(score%30==0 && score!=0) power=true;
 			if(power) {
-				powergauge.setIcon(power_full);
+				powergauge.setImage(power_full.getImage());
 			}else {
-				powergauge.setIcon(power_ing);
+				powergauge.setImage(power_ing.getImage());
 			}
 
 			// 시간이 일정시간 지나면 새로운 외계인들을 출현시킴
@@ -426,10 +460,10 @@ public class Gamepanel extends JPanel{
 			// 시간이 일정시간 지나면 폭탄,새,스톤,,,,아이템들  출현/소멸 시킴
 			if (score % OTHER_ATTACKER_INTERVAL == 0) {
 
-				randNum=(int)(Math.random()*12)+4;
+				randNum=(int)(Math.random()*9)+4;
 				sbb.add(getRandomMoving(randNum));
 
-				randNum=(int)(Math.random()*15)+13;
+				randNum=(int)(Math.random()*2)+13;
 				item.add(getRandomMoving(randNum));
 
 
@@ -471,76 +505,79 @@ public class Gamepanel extends JPanel{
 		case 4 :	//case 4~8 폭탄
 			newAttacker =  new Moving(getClass().getResource("/Image/ball1.png"),
 					getClass().getResource("/Image/boom.gif"),
-					S_MARGIN,xB,yB);
+					S_MARGIN,xB,yB,"boom");
 			newAttacker.setBoom(true);
 			break;
 		case 5:
 			newAttacker =  new Moving(getClass().getResource("/Image/ball2.png"),
 					getClass().getResource("/Image/boom.gif"),
-					S_MARGIN,xB,yB);
+					S_MARGIN,xB,yB,"boom");
 			newAttacker.setBoom(true);
 			break;
 		case 6:
 			newAttacker =  new Moving(getClass().getResource("/Image/ball3.png"),
 					getClass().getResource("/Image/boom.gif"),
-					B_MARGIN,xB,yB);
+					B_MARGIN,xB,yB,"boom");
 			newAttacker.setBoom(true);
 			break;
 		case 7:
 			newAttacker =  new Moving(getClass().getResource("/Image/ball4.png"),
 					getClass().getResource("/Image/boom.gif"),
-					B_MARGIN,xB,yB);
+					B_MARGIN,xB,yB,"boom");
 			newAttacker.setBoom(true);
 			break;
 		case 8: //8~10 stone
 			newAttacker =  new Moving(getClass().getResource("/Image/stone1.png"),
 					getClass().getResource("/Image/stone_destroyed.gif"),
-					B_MARGIN,xB,yB);
+					B_MARGIN,xB,yB,"stone");
 			newAttacker.setBoom(true);
 			break;		
 		case 9:
 			newAttacker =  new Moving(getClass().getResource("/Image/stone3.png"),
 					getClass().getResource("/Image/stone_destroyed.gif"),
-					S_MARGIN,xB,yB);
+					S_MARGIN,xB,yB,"stone");
 			newAttacker.setBoom(true);
 			break;
 		case 10:
 			newAttacker =  new Moving(getClass().getResource("/Image/stone4.png"),
 					getClass().getResource("/Image/stone_destroyed.gif"),
-					B_MARGIN,xB,yB);
+					B_MARGIN,xB,yB,"stone");
 			newAttacker.setBoom(true);
 			break;
 
 		case 11: //11~12새
 			newAttacker =  new Moving(getClass().getResource("/Image/blackbird.gif"),
 					getClass().getResource("/Image/blackbird_attacked.gif"),
-					B_MARGIN,xB,yB);
+					B_MARGIN,xB,yB,"stone");
 			newAttacker.setBird(true);
 			break;
 		case 12:
 			newAttacker =  new Moving(getClass().getResource("/Image/redbird.gif"),
 					getClass().getResource("/Image/redbird_attacked.gif"),
-					B_MARGIN,xB,yB);
+					B_MARGIN,xB,yB,"stone");
 			newAttacker.setBird(true);
 			break;
 		case 13:
-			newAttacker= new Moving(getClass().getResource("/Image/ph.gif"),OTHER_MARGIN);
+			newAttacker= new Moving(getClass().getResource("/Image/ph.gif"),OTHER_MARGIN,"ph");
 			break;
 		case 14:
-			newAttacker =new Moving(getClass().getResource("/Image/power.gif"),OTHER_MARGIN);
+			newAttacker =new Moving(getClass().getResource("/Image/power.gif"),OTHER_MARGIN,"power");
 
 		}
 		return newAttacker;
 	}
 	public void setPhbar(int ph) {
-		if(ph==4) phBar.setIcon(ph_4);
-		else if(ph==3) phBar.setIcon(ph_3);
-		else if(ph==2)phBar.setIcon(ph_2);
-		else if(ph==1)phBar.setIcon(ph_1);
-		else if(ph==0) 	phBar.setIcon(ph_0); //게임종료
+		if(ph==4) phBar.setImage(ph_4.getImage());
+		else if(ph==3) phBar.setImage(ph_3.getImage());
+		else if(ph==2)phBar.setImage(ph_2.getImage());
+		else if(ph==1)phBar.setImage(ph_1.getImage());
+		else if(ph==0) 	phBar.setImage(ph_0.getImage()); //게임종료
 		else if(ph<0) {
 			goAnime.stop();
 			goScore.stop();
+			hero.setImage(hero_Attacked.getImage());
+			finished=true;
+			System.out.println("게임종료!");
 		}
 	}
 	public Moving getcoin(int x,int y) {
@@ -548,47 +585,154 @@ public class Gamepanel extends JPanel{
 		NewItem=new Moving(getClass().getResource("/Image/coin.gif"),OTHER_MARGIN,x,y);
 		return NewItem;
 	}
+
+	public void AttackerInit() {
+		alian.clear();
+		Attacker_weapon.clear();
+		prepareAttacker();
+
+	}
 	public class AnimeListener implements ActionListener {
 		public void actionPerformed(ActionEvent arg0) {
+			//코인먹게
+			for(Moving m :coinList) {
+				if(m.collide(new Point(hero.x,hero.y))) {
+					coinList.remove(m);
+					coinNum++;
+					break;
+				}
+			}
+			for(Moving m:item) {
+				if(m.collide(new Point(hero.x,hero.y))) {
+					if(m.whatItem().equals("ph")) { 
+						ph++;
+						setPhbar(ph);
+						item.remove(m);
+						break;
+					}
+					else if(m.whatItem().equals("power")) {
+						power=true;
+						item.remove(m);
+						break;
+					}
+
+				}
+			}
+			for(Bullet b:weapon) {
+				for(Moving m:alian)
+					if(b.collide(m)) {
+						alian.remove(m);
+						Bullet tmpbullet =new Bullet(m.getBullet(),m.getX(),m.getY());
+						Attacker_weapon.remove(tmpbullet);
+						break;
+					}
+				for(Moving m:sbb)
+					if(b.collide(m)) {
+						if(m.whatAttacker() == "stone")
+						{	m.setImage(new ImageIcon("src/Image/stone_destroyed.gif").getImage());
+							//sbb.remove(m);
+							break;
+						}else if(m.whatAttacker() == "boom") {
+							m.setImage(new ImageIcon("src/Image/boom.gif").getImage());
+							//sbb.remove(m);
+							break;
+						}
+						else {
+							sbb.remove(m);
+							break;
+						}
+					}
+			}if(!hero.invincible) {
+				for(Bullet b:Attacker_weapon) {
+					if(b.collide(hero))
+					{
+						ph--;
+						setPhbar(ph);
+						hero.invincible = true;
+						invinceTimer =100;
+					}
+				}
+			}
+			if(attacked) {
+				hero.setImage(hero_invincibility.getImage());
+				attacked =false;
+			}
+			if(restart)
+				hero.setImage(hero_flybasic.getImage());
+
+			if(space) {
+				hero.setImage(hero_attackbasic.getImage());
+			}
+
+			if(invinceTimer>0) {
+				invinceTimer--;	
+				hero.setImage(hero_invincibility.getImage());
+			}
+			else hero.invincible = false;
+			if(invinceTimer == 1)hero.setImage(hero_attackbasic.getImage());
 			// 만약 충돌하였으면 충돌의 효과음 나타내고 타이머를 중단시킴
+
 			heroMove();
 			x-=1;
 			if(x<-160)x=0;
 			// 그림 객체들을 이동시킴
 			if(!alian.isEmpty()) {
-				for (Moving s : alian) {
-					if (s.collide(new Point(hero.x, hero.y))) {
-						//boomSound.play();					// 충돌의 음향
-						//hero다친걸로 그려주기
-						//체력 닳기 (ph--)->setPhbar();
-						attacked=true;
-						ph--;
-						setPhbar(ph);
+				if(!hero.invincible) {
+					for (Moving s : alian) {
+						if (s.collide(new Point(hero.x, hero.y))) {
+							hero.invincible = true;
+							invinceTimer =100;
+							//boomSound.play();					// 충돌의 음향
 
+							//체력 닳기 (ph--)->setPhbar();
+							attacked=true;
+							ph--;
+							setPhbar(ph);
+							System.out.println("에일리언한테 닿았엉");
+
+						}
 					}
 				}
 				for (Moving m : alian) {
+					if(m.outside()) {
+						alian.remove(m);
+						break;
+					}
 					m.Horizontallymove();
 				}
 			}
 			if(!sbb.isEmpty()) {
-				for (Moving m : sbb) {
-					if (m.collide(new Point(hero.x, hero.y))) {
-						//boomSound.play();					// 충돌의 음향
-						//hero다친걸로 그려주기
-						attacked=true;
-						ph--;
-						setPhbar(ph);
+				if(!hero.invincible) {
+					for (Moving m : sbb) {
+						if (m.collide(new Point(hero.x, hero.y))) {
+							//boomSound.play();					// 충돌의 음향
 
+							hero.invincible = true;
+							invinceTimer =100;
+							attacked=true;
+							ph--;
+							setPhbar(ph);
+							System.out.println("ssb한테 닿았엉");
+						}
 					}
 				}
 				//움직임 
 				for (Moving m : sbb) {
-					if(m.boom)
+					if(m.boom) {
 						m.Diaonallymove();
-					else if(m.bird)
+						if(m.outside()) {
+							sbb.remove(m);
+							break;
+						}
+					}
+					else if(m.bird) {
 						m.Horizontallymove();
-				}	
+						if(m.outside()) {
+							sbb.remove(m);
+							break;
+						}
+					}	
+				}
 			}
 			if(!coinList.isEmpty()) {
 				for(Moving m: coinList) {

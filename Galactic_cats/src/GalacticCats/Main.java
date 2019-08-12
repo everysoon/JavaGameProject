@@ -22,6 +22,7 @@ public class Main extends JFrame{
 		
 		add(panel);
 		addKeyListener(tmp2);
+		
 	}
 	
 	public static void main (String []args) {

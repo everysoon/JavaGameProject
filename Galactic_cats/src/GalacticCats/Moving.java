@@ -24,8 +24,10 @@ public class Moving extends ImageIcon {
 	URL bullet;
 	boolean bird=false;
 	boolean boom=false;
-	boolean item=false; 
-	boolean isattacked;
+	String item;
+	String what;
+	boolean invincible =false;
+	
 	public Moving(URL imgURL,URL attack_img,URL attacked_img,URL bullet,int x, int y, int margin, int steps, int xBoundary, int yBoundary) {
 		// imgPath : 그림 파일의 경로명
 		// x, y : 이미지의 시작 위치 좌표
@@ -37,8 +39,8 @@ public class Moving extends ImageIcon {
 		this.attacked_img=attacked_img;
 		this.bullet=bullet;
 		this.x = x;
+		this.y = y;	
 		this.initX = x;
-		this.y = y;
 		this.initY = y;
 		this.margin = margin;
 		this.xDirection = 1;
@@ -46,48 +48,51 @@ public class Moving extends ImageIcon {
 		this.steps = steps;
 		this.xBoundary = xBoundary;
 		this.yBoundary = yBoundary;
-		isattacked=false;
+		img=imgURL;
+	
 	}
 	//stone,ball,새 이미지 그리기 : (attack_img)없는 애들 
-	public Moving(URL imgURL,URL attacked,int margin,int xBoundary,int yBoundary) {
+	public Moving(URL imgURL,URL attacked,int margin,int xBoundary,int yBoundary,String what) {
 		super(imgURL);
 		this.attacked_img=attacked;
+		this.what = what;
 		this.margin=margin;
 		this.xBoundary=xBoundary;
 		this.yBoundary=yBoundary;
 		this.xDirection=1;
 		this.yDirection=1;
-		x= (int) (Math.random() * xBoundary/2)+xBoundary/2;
+		this.x= (int) (Math.random() * xBoundary/2)+xBoundary/2;
 		this.y= (int) (Math.random() * yBoundary/2+100)+80;
 		this.initX=x;
 		this.initY=y;
 		this.steps=5;
-		isattacked=false;
+		img=imgURL;
+		
 	}
 
 	//ph포션,파워포션,
-	public Moving(URL imgURL,int margin) {
+	public Moving(URL imgURL,int margin,String item) {
 		super(imgURL);
 		this.initX=x;
 		this.initY=y;
+		this.item=item;
 		this.steps=5;
 		this.xDirection = 1;
 		this.yDirection = 1;
 		this.xBoundary=1155-margin;
 		this.yBoundary=688-margin;
-		this.x= (int) (Math.random() * xBoundary/2)+xBoundary/2;
+		this.x= (int) (Math.random() * xBoundary/2)+xBoundary/2-150;
 		this.y= (int) (Math.random() * yBoundary/2+100)+80;
 		this.margin=margin;
-		item=true;
-		isattacked=false;
+		img=imgURL;
+	
 	}
 	//코인 
 	public Moving(URL imgURL, int margin,int x,int y) {
-		this(imgURL,margin);
+		this(imgURL,margin,"coin");
 		this.x=x;
 		this.y=y;
-
-		isattacked=false;
+		img=imgURL;
 
 	}
 	// 시작 위치를 임의의 포인트로 주는 구성자 
@@ -106,24 +111,27 @@ public class Moving extends ImageIcon {
 		this.y= (int) (Math.random() * yBoundary/2+100)+80;
 		this.initX=x;
 		this.initY=y;
-		isattacked=false;
+		img=imgURL;
+	
 
 	}
-
-	public boolean isAttacked() {
-		return isattacked;
+	
+	public boolean outside() {
+		if(this.x<0)
+			return true;
+		return false;
 	}
-	public void setAttacked(boolean isattacked) {
-		this.isattacked=isattacked;
+	public String whatAttacker() {
+		return what;
+	}
+	public String whatItem() {
+		return item;
 	}
 	public void setBoom(boolean boom) {
 		this.boom=boom;
 	}
 	public void setBird(boolean bird) {
 		this.bird=bird;
-	}
-	public void setItem(boolean item) {
-		this.item=item;
 	}
 	public void setX(int x) {
 		this.x = x;
@@ -157,9 +165,6 @@ public class Moving extends ImageIcon {
 	public URL getImg() {
 		return img;
 	}
-	public void setImg(URL img) {
-		this.img = img;
-	}
 	public URL getBullet() {
 		return bullet;
 	}
@@ -169,7 +174,7 @@ public class Moving extends ImageIcon {
 		if (p.distance(p2) <= margin) return true;
 		return false;
 	}
-
+	
 	public void reset() {
 		x = initX; y= initY;
 	}
