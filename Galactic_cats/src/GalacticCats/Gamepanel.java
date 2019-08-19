@@ -22,16 +22,17 @@ import javax.swing.Timer;
 
 public class Gamepanel extends JPanel{
 	final int SPEED=50;
-	final int A_MARGIN=110;//외계인들 마진
-	final int B_MARGIN=80; //큰 폭탄,새,큰 운석들 마진
-	final int S_MARGIN=40; //작은 폭탄들 마진 
-	final int OTHER_MARGIN=50; //포션들 마진
-	final int STEPS=5;
+	final int A_MARGIN=110;//alian,hero margin
+	final int B_MARGIN=80; //Big boom,bird,Big stone margin
+	final int S_MARGIN=40; //small bomb,small stone margin
+	final int OTHER_MARGIN=50; //item margin
+	final int STEPS=5; //speed 
 	final int NEW_ATTACKER_INTERVAL= 5;
 	final int OTHER_ATTACKER_INTERVAL= 5;
-	final int xB=1045;
+	final int xB=1045; //xB,yB is WIDTH - margin, HEIGHT - margin 
 	final int yB=578;
 
+	//Buffer Image,Buffer Graphics for double Buffering 
 	Image buffImage;
 	Graphics buffg;
 
@@ -51,12 +52,12 @@ public class Gamepanel extends JPanel{
 	ImageIcon powergauge =new ImageIcon(power_ing.getImage());
 	ImageIcon attack_touched =new ImageIcon("src/Image/attack_touched.gif");
 	ImageIcon special_attack =new ImageIcon("src/Image/special_attack.gif");
-
 	ImageIcon hero_invincibility =new ImageIcon("src/Image/invincibility.gif");
 	ImageIcon hero_flybasic =new ImageIcon ();
 	ImageIcon hero_attackbasic =new ImageIcon();
 	ImageIcon hero_Attacked =new ImageIcon ();
 	ImageIcon hero_specialAttack =new ImageIcon("src/Image/special.gif");
+
 	ArrayList<Bullet> weapon=new ArrayList<Bullet>();
 	ArrayList<Bullet> Attacker_weapon=new ArrayList<Bullet>();
 	ArrayList<Moving> alian;
@@ -67,11 +68,11 @@ public class Gamepanel extends JPanel{
 	JButton startButton =new JButton();
 	JButton reStartButton =new JButton();
 	JButton quitButton =new JButton();
-	ClockListener clockListener;
 
+	//goAnime,goScore Timer , clockListener for image Moving 
 	Timer goAnime;
 	Timer goScore;
-	Bullet coin;
+
 	Moving hero;
 	Moving green;
 	Moving purple;
@@ -83,7 +84,7 @@ public class Gamepanel extends JPanel{
 	int x=0;
 	int ph=4;
 
-	int invinceTimer =0;
+	int invincibleTimer =0; //hero invincibleDelayTimer int variable
 
 	String playerName;
 
@@ -92,18 +93,20 @@ public class Gamepanel extends JPanel{
 	boolean start=false;
 	boolean power=false;
 	boolean attacked=false;
-	boolean upPushed=false;
+	boolean upPushed=false; // up,down,left,right boolean variable
 	boolean downPushed=false;
 	boolean leftPushed=false;
 	boolean rightPushed=false;
 	boolean restart =false;
 
-	KeyListener tmp=new heroKeyEvent();
-
 	public Gamepanel() {
 		playerName=JOptionPane.showInputDialog("이름을 입력해주세요 :");
-		setup();
+		if(playerName == null ) //Dialog 'cancle' pressed quit.  
+			System.exit(1);
+		setup(); 
 	}
+
+	//GUI setting
 	public void setup() {
 
 		setBounds(0,0,1155,688);
@@ -111,20 +114,25 @@ public class Gamepanel extends JPanel{
 
 		startButton.setBounds(230,550,680,100);
 		startButton.setBackground(Color.white);
-		startButton.setBorderPainted(false);
-		startButton.setOpaque(false);
+		startButton.setBorderPainted(false);  //Button edge	Invisible
+		startButton.setOpaque(false);	//Button Opaque
 		startButton.addActionListener(new startButtonListener());
 
 		reStartButton.setBounds(420,390,140,40);
 		reStartButton.addActionListener(new reStartButtonListener());
+		reStartButton.setVisible(false);
 
 		quitButton.setBounds(600,390,140,40);
 		quitButton.addActionListener(new quitButtonListener());
+		quitButton.setVisible(false);
+
+		prepareAttacker();
+		this.addKeyListener(new heroKeyEvent());
 		add(reStartButton);
 		add(quitButton);
 		add(startButton);
-		prepareAttacker();
-		//캐릭터
+
+		//Hero Character create 
 		hero=new Moving(getClass().getResource("/Image/fly_basic.gif"),
 				getClass().getResource("/Image/basic.gif"),
 				getClass().getResource("/Image/hero_attacked.gif"),
@@ -136,24 +144,24 @@ public class Gamepanel extends JPanel{
 		hero_Attacked.setImage(new ImageIcon(hero.getAttacked_img()).getImage());;
 
 		//타이머
-		clockListener = new ClockListener();
-		goScore = new Timer(800, clockListener);			// 시간을 초단위로 나타내기 위한 리스너
-		goAnime = new Timer(SPEED, new AnimeListener());	// 그림의 이동을 처리하기 위한 리스너
+
+		goScore = new Timer(800, new ClockListener());			// Listener for handling the time in seconds
+		goAnime = new Timer(SPEED, new AnimeListener());	// Listener for handling the movement of the picture
 
 	}
 
-	//깜빡임 현상을 위한 더블버퍼링 구현 paint메소드와 screenDraw메소드 
+	// paint, screenDraw Method for Double Buffering 
 	public void paint(Graphics g) {
-		buffImage = createImage(1155, 688);
-		buffg = buffImage.getGraphics();
-		screenDraw(buffg);
-		g.drawImage(buffImage,0,0,null);
+		buffImage = createImage(1155, 688); // frame size : 1155 = WIDTH , 688 = HEIGHT ,bufferImage create 
+		buffg = buffImage.getGraphics();  //bufferGraphics is bufferImage get Graphics 
+		screenDraw(buffg);//Draw Image bufferGraphics 
+		g.drawImage(buffImage,0,0,null);//PaintComponent draw bufferImage 
 	}
 	public void screenDraw(Graphics g) {
 
-		if(!start)g.drawImage(startBackground,0,0,null); //첫 화면 
-		else { //게임화면으로 전환
-
+		if(!start)g.drawImage(startBackground,0,0,null); //readyScreen
+		else { 
+			//gameScreen draw 
 			g.drawImage(gameBackground,x,0,null);
 			g.drawImage(phBar.getImage(),750,60,null);
 			g.drawImage(profile.getImage(),15,15,null);
@@ -162,11 +170,11 @@ public class Gamepanel extends JPanel{
 			g.setColor(Color.BLACK);
 			g.setFont(new Font("Serif",Font.BOLD,25));
 			g.drawString("X"+coinNum,1030,100);
-			g.drawString(playerName,230,58);
 			g.drawString(String.valueOf(score),240,98);
-
+			g.setFont(new Font("Serif",Font.BOLD,20));
+			g.drawString(playerName,230,58);
+			//draw hero Character, alian,sbb,coin,item 
 			hero.draw(g,this);
-
 			for (Moving m : alian) {
 				m.draw(g,this);
 			}     
@@ -180,16 +188,13 @@ public class Gamepanel extends JPanel{
 				m.draw(g,this);
 			}
 			for(Bullet b:weapon) {
-				if(power) {
-					b.setImage(new ImageIcon("src/Image/special_attack.gif").getImage());
+				if(power) { //if powerGauge full ,hero bullet Image change specialattack image    
+					b.setImage(new ImageIcon("src/Image/special_attack.gif").getImage()); 
 					b.setBulletSize(140,95);
 					power=false;
 				}
-				else
-				{
-					b.draw(g);
-				}
-				if(b.outside_Hero()) {
+				b.draw(g);
+				if(b.outside_Hero()) { //if bullet is outside , remove that 
 					weapon.remove(b);
 					break;
 				}
@@ -211,12 +216,9 @@ public class Gamepanel extends JPanel{
 				g.drawString(playerName,440,360);
 				g.drawString(String.valueOf(score),660,290);
 			}
-
 		}
-
 		this.repaint();
 	}
-
 	public class startButtonListener implements ActionListener{
 
 		@Override
@@ -226,8 +228,7 @@ public class Gamepanel extends JPanel{
 			prepareAttacker();
 			goScore.start();
 			goAnime.start();
-			startButton.setContentAreaFilled(false);
-			startButton.setFocusPainted(false);
+			focus(); //startButton clicked, ButtonListener transform foucus KeyListener 
 		}
 
 	}
@@ -244,14 +245,15 @@ public class Gamepanel extends JPanel{
 			for(Moving b : coinList) {
 				b.reset();
 			}
+			//init
 			coinNum = 0;
 			ph = 4;
 			score = 0;
 			hero.setImage(hero_flybasic.getImage());
 			setPhbar(ph);
 			AttackerInit();
+			focus();//reStartButton clicked, ButtonListener transform foucus KeyListener 	
 			restart=true;
-			focus();
 		}
 
 	}
@@ -260,23 +262,25 @@ public class Gamepanel extends JPanel{
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			System.exit(1);
-
 		}
 
 	}
 	public void focus() {
-		if(restart) {
-			System.out.println("restart포커스강제지정");
-			this.setFocusable(true);
-			this.requestFocus();
-		}
+		this.setFocusable(true);
+		this.requestFocus();
 	}
-	public void prepareAttacker() {
+	public void prepareAttacker() { 
 
 		coinList=new ArrayList<Moving>();
 		item=new ArrayList<>();
 		alian=new ArrayList<>();
 		sbb=new ArrayList<>();
+
+		//alian Attacker yellow,green,purple create 
+		//sbb Attacker random create
+		//item random create 
+		//coin setting 
+
 		green=new Moving(getClass().getResource("/Image/green_attack.gif"),
 				getClass().getResource("/Image/green_attacked.gif"),
 				getClass().getResource("/Image/attack4.png"),
@@ -298,20 +302,27 @@ public class Gamepanel extends JPanel{
 				);
 		alian.add(yellow);
 
+		for(Moving m:alian) {
+			if(m.isDie()==false) {
+				Attacker_weapon.add(new Bullet(green.getBullet(),green.getX(),green.getY()+green.getMargin()/2));
+				Attacker_weapon.add(new Bullet(purple.getBullet(),purple.getX(),purple.getY()+purple.getMargin()/2));
+				Attacker_weapon.add(new Bullet(yellow.getBullet(),yellow.getX(),yellow.getY()+yellow.getMargin()/2));
+			}
+		}
 		for(int i=0; i<3; i++) {
 			randNum=(int)(Math.random()*2)+13;
-			item.add(getRandomMoving(randNum));
-			System.out.println("item"+randNum+item);
+			item.add(getRandomMoving(randNum));	
 		}
 		for(int i=0; i<3; i++) {
 			randNum=(int)(Math.random()*9)+4;
 			sbb.add(getRandomMoving(randNum));
-			System.out.println("sbb"+randNum+sbb);
 		}
-
 		coinInit();
 	}
 	public void coinInit() {
+
+		//prepare coin setting 
+
 		for(int i=0; i<150; i+=30) {
 			coinList.add(getcoin(500+i,200));
 			coinList.add(getcoin(1000+i,400+i));
@@ -342,7 +353,6 @@ public class Gamepanel extends JPanel{
 	public class heroKeyEvent implements KeyListener{
 		@Override
 		public void keyPressed(KeyEvent e) {
-			//캐릭터안움직임 
 
 			switch(e.getKeyCode()) {
 			case KeyEvent.VK_UP:
@@ -375,22 +385,15 @@ public class Gamepanel extends JPanel{
 				break;
 			case KeyEvent.VK_SPACE:
 				space=true;
-				weapon.add(new Bullet(hero.getBullet(),hero.x,hero.y));	
-				if(power) {
+				weapon.add(new Bullet(hero.getBullet(),hero.x,hero.y));	//if space key pressed , bullet create 
+				if(power) { // when powerGauge full, if space key pressed specialAttack bullet create  
 					weapon.add(new Bullet(getClass().getResource("/Image/special_attack.gif"),hero.x,hero.y));
 					hero.setImage(hero_specialAttack.getImage());
 				}else {
 					hero.setImage(hero_flybasic.getImage());
 				}
 				break;	
-
-
 			}
-		}
-
-		@Override
-		public void keyTyped(KeyEvent e) {
-
 		}
 
 		@Override
@@ -415,6 +418,9 @@ public class Gamepanel extends JPanel{
 			}
 
 		}
+		@Override
+		public void keyTyped(KeyEvent e) {}
+
 	}
 
 	public void heroMove() {
@@ -422,13 +428,13 @@ public class Gamepanel extends JPanel{
 			if (hero.y >= 0)
 				hero.y -= 10;
 		if(downPushed) 
-			if (hero.y <=580)
+			if (hero.y <=xB)
 				hero.y += 10;
 		if(leftPushed)
 			if (hero.x >= 0)
 				hero.x -= 10;
 		if(rightPushed)
-			if (hero.x <=1050)
+			if (hero.x <=yB)
 				hero.x += 10;
 	}
 
@@ -436,12 +442,7 @@ public class Gamepanel extends JPanel{
 
 		public void actionPerformed (ActionEvent event) {
 
-			score++;	
-			Attacker_weapon.add(new Bullet(green.getBullet(),green.getX(),green.getY()+green.getMargin()/2));
-			Attacker_weapon.add(new Bullet(purple.getBullet(),purple.getX(),purple.getY()+purple.getMargin()/2));
-			Attacker_weapon.add(new Bullet(yellow.getBullet(),yellow.getX(),yellow.getY()+yellow.getMargin()/2));
-			//코인개수 setText 해주기
-
+			score++;
 			if(score%30==0 && score!=0) power=true;
 			if(power) {
 				powergauge.setImage(power_full.getImage());
@@ -449,15 +450,16 @@ public class Gamepanel extends JPanel{
 				powergauge.setImage(power_ing.getImage());
 			}
 
-			// 시간이 일정시간 지나면 새로운 외계인들을 출현시킴
+			//When time passes,New alian emergence
 			if (score % NEW_ATTACKER_INTERVAL == 0) {
 				randNum=(int)(Math.random()*3)+1;
 				alian.add(getRandomMoving(randNum));
 				for(Moving m:alian) {
-					Attacker_weapon.add(new Bullet(m.getBullet(),m.getX(),m.getY()+m.getMargin()/2));	
+					if(m.isDie()==false)
+						Attacker_weapon.add(new Bullet(m.getBullet(),m.getX(),m.getY()+m.getMargin()/2));	
 				}
 			}
-			// 시간이 일정시간 지나면 폭탄,새,스톤,,,,아이템들  출현/소멸 시킴
+			//When time passes,New bomb,bird,stone emergence
 			if (score % OTHER_ATTACKER_INTERVAL == 0) {
 
 				randNum=(int)(Math.random()*9)+4;
@@ -475,7 +477,7 @@ public class Gamepanel extends JPanel{
 		Moving newAttacker = null;
 
 		switch (rand) {
-		case 1 : //1~3은 외계인들 
+		case 1 : //case 1~3 : alian
 			newAttacker = new Moving(getClass().getResource("/Image/green_attack.gif"),
 					getClass().getResource("/Image/green_attacked.gif"),
 					getClass().getResource("/Image/attack4.png"),
@@ -502,7 +504,7 @@ public class Gamepanel extends JPanel{
 			for(int i=0;i<10;i++)
 				Attacker_weapon.add(new Bullet(newAttacker.getBullet(),newAttacker.getX(),newAttacker.getY()+newAttacker.getMargin()/2));
 			break;
-		case 4 :	//case 4~8 폭탄
+		case 4 :	//case 4~8 bomb
 			newAttacker =  new Moving(getClass().getResource("/Image/ball1.png"),
 					getClass().getResource("/Image/boom.gif"),
 					S_MARGIN,xB,yB,"boom");
@@ -526,7 +528,7 @@ public class Gamepanel extends JPanel{
 					B_MARGIN,xB,yB,"boom");
 			newAttacker.setBoom(true);
 			break;
-		case 8: //8~10 stone
+		case 8: //case 8~10 stone
 			newAttacker =  new Moving(getClass().getResource("/Image/stone1.png"),
 					getClass().getResource("/Image/stone_destroyed.gif"),
 					B_MARGIN,xB,yB,"stone");
@@ -545,7 +547,7 @@ public class Gamepanel extends JPanel{
 			newAttacker.setBoom(true);
 			break;
 
-		case 11: //11~12새
+		case 11: //case 11~12 bird
 			newAttacker =  new Moving(getClass().getResource("/Image/blackbird.gif"),
 					getClass().getResource("/Image/blackbird_attacked.gif"),
 					B_MARGIN,xB,yB,"stone");
@@ -567,23 +569,30 @@ public class Gamepanel extends JPanel{
 		return newAttacker;
 	}
 	public void setPhbar(int ph) {
+
+		//phBar setting 
 		if(ph==4) phBar.setImage(ph_4.getImage());
 		else if(ph==3) phBar.setImage(ph_3.getImage());
 		else if(ph==2)phBar.setImage(ph_2.getImage());
-		else if(ph==1)phBar.setImage(ph_1.getImage());
-		else if(ph==0) 	phBar.setImage(ph_0.getImage()); //게임종료
-		else if(ph<0) {
+		else if(ph==1)phBar.setImage(ph_1.getImage()); 
+		else if(ph==0) {
+			//Game Finished 
+			phBar.setImage(ph_0.getImage());
 			goAnime.stop();
 			goScore.stop();
 			hero.setImage(hero_Attacked.getImage());
+			reStartButton.setVisible(true);
+			quitButton.setVisible(true);
 			finished=true;
-			System.out.println("게임종료!");
 		}
 	}
 	public Moving getcoin(int x,int y) {
+
+		//create Coin 
 		Moving NewItem=null;
 		NewItem=new Moving(getClass().getResource("/Image/coin.gif"),OTHER_MARGIN,x,y);
 		return NewItem;
+
 	}
 
 	public void AttackerInit() {
@@ -592,9 +601,16 @@ public class Gamepanel extends JPanel{
 		prepareAttacker();
 
 	}
+	//AnimeListener is that if hero and something collide, implemented a situation
 	public class AnimeListener implements ActionListener {
 		public void actionPerformed(ActionEvent arg0) {
-			//코인먹게
+			heroMove(); //hero moving
+
+			//background moving x
+			x-=1; 
+			if(x<-160)x=0;
+
+			//When hero and coin collide , coin remove and coinNum plus
 			for(Moving m :coinList) {
 				if(m.collide(new Point(hero.x,hero.y))) {
 					coinList.remove(m);
@@ -602,6 +618,7 @@ public class Gamepanel extends JPanel{
 					break;
 				}
 			}
+			//When hero and item collide , if item is ph, ph plus else item is power,change powergauge full ,and item remove
 			for(Moving m:item) {
 				if(m.collide(new Point(hero.x,hero.y))) {
 					if(m.whatItem().equals("ph")) { 
@@ -615,44 +632,49 @@ public class Gamepanel extends JPanel{
 						item.remove(m);
 						break;
 					}
-
 				}
 			}
+			// when hero bullet and attacker collide , attacker remove
 			for(Bullet b:weapon) {
-				for(Moving m:alian)
-					if(b.collide(m)) {
-						alian.remove(m);
-						Bullet tmpbullet =new Bullet(m.getBullet(),m.getX(),m.getY());
-						Attacker_weapon.remove(tmpbullet);
+				for(Moving m:alian) {
+					if(b.collide(m)) {	
+						m.isdie= true; // if isdie is true, do not create alian bullet
+						alian.remove(m);	
 						break;
 					}
-				for(Moving m:sbb)
+				}
+				for(Moving m:sbb) {
 					if(b.collide(m)) {
-						if(m.whatAttacker() == "stone")
-						{	m.setImage(new ImageIcon("src/Image/stone_destroyed.gif").getImage());
-							//sbb.remove(m);
+						if(m.whatAttacker() == "stone"){
+							m.setImage(new ImageIcon("src/Image/stone_destroyed.gif").getImage());	
+							sbb.remove(m);
 							break;
 						}else if(m.whatAttacker() == "boom") {
 							m.setImage(new ImageIcon("src/Image/boom.gif").getImage());
-							//sbb.remove(m);
+							sbb.remove(m);
 							break;
-						}
-						else {
+
+						}else {
 							sbb.remove(m);
 							break;
 						}
 					}
-			}if(!hero.invincible) {
-				for(Bullet b:Attacker_weapon) {
+				}
+			}
+			//when attacker bullet and hero collide, hero ph minuous,invincible true 
+			if(!hero.invincible) {
+				for(Bullet b :Attacker_weapon) {
 					if(b.collide(hero))
 					{
 						ph--;
 						setPhbar(ph);
 						hero.invincible = true;
-						invinceTimer =100;
+						invincibleTimer =100;
 					}
 				}
 			}
+
+			//hero Image setting 
 			if(attacked) {
 				hero.setImage(hero_invincibility.getImage());
 				attacked =false;
@@ -664,59 +686,57 @@ public class Gamepanel extends JPanel{
 				hero.setImage(hero_attackbasic.getImage());
 			}
 
-			if(invinceTimer>0) {
-				invinceTimer--;	
+			//hero invincible 
+			if(invincibleTimer>0) { 
+				invincibleTimer--;	
 				hero.setImage(hero_invincibility.getImage());
 			}
-			else hero.invincible = false;
-			if(invinceTimer == 1)hero.setImage(hero_attackbasic.getImage());
-			// 만약 충돌하였으면 충돌의 효과음 나타내고 타이머를 중단시킴
+			else{	
+				hero.invincible = false;
+			}
+			if(invincibleTimer == 1){
+				hero.setImage(hero_attackbasic.getImage());
+			}
 
-			heroMove();
-			x-=1;
-			if(x<-160)x=0;
-			// 그림 객체들을 이동시킴
+			//when alian and hero collide ,hero ph minuous,invincible true 
 			if(!alian.isEmpty()) {
 				if(!hero.invincible) {
-					for (Moving s : alian) {
-						if (s.collide(new Point(hero.x, hero.y))) {
-							hero.invincible = true;
-							invinceTimer =100;
+					for (Moving m : alian) {
+						if (m.collide(new Point(hero.x, hero.y))) {
 							//boomSound.play();					// 충돌의 음향
-
-							//체력 닳기 (ph--)->setPhbar();
+							hero.invincible = true;
+							invincibleTimer =100;
 							attacked=true;
 							ph--;
 							setPhbar(ph);
-							System.out.println("에일리언한테 닿았엉");
-
 						}
 					}
 				}
 				for (Moving m : alian) {
-					if(m.outside()) {
+					if(m.outside()) {  //if alian outside , remove 
 						alian.remove(m);
 						break;
 					}
 					m.Horizontallymove();
 				}
 			}
+			
+			//when sbb and hero collide , hero ph minuous ,invincible true 
 			if(!sbb.isEmpty()) {
 				if(!hero.invincible) {
 					for (Moving m : sbb) {
 						if (m.collide(new Point(hero.x, hero.y))) {
 							//boomSound.play();					// 충돌의 음향
-
 							hero.invincible = true;
-							invinceTimer =100;
+							invincibleTimer =100;
 							attacked=true;
 							ph--;
 							setPhbar(ph);
-							System.out.println("ssb한테 닿았엉");
 						}
 					}
 				}
-				//움직임 
+				//if bomb of sbb , Dianallymove 
+				//else if bird of sbb , Horizontallymove 
 				for (Moving m : sbb) {
 					if(m.boom) {
 						m.Diaonallymove();
@@ -734,16 +754,12 @@ public class Gamepanel extends JPanel{
 					}	
 				}
 			}
+			//coin if Horizontallymove 
 			if(!coinList.isEmpty()) {
 				for(Moving m: coinList) {
 					m.Horizontallymove();
 				}
 			}
-
-
-
-			//hero 가 총쏴서 적들죽이는거 구현 ->적들 arrayList에서 remove;
-			//적들이 총쏴서 hero가 맞는거 구현 -> 체력닳기 ->체력 다닳으면 끝내기 (return)
 		}
 	}
 }

@@ -27,7 +27,8 @@ public class Moving extends ImageIcon {
 	String item;
 	String what;
 	boolean invincible =false;
-	
+	boolean isdie =false; 
+
 	public Moving(URL imgURL,URL attack_img,URL attacked_img,URL bullet,int x, int y, int margin, int steps, int xBoundary, int yBoundary) {
 		// imgPath : 그림 파일의 경로명
 		// x, y : 이미지의 시작 위치 좌표
@@ -49,7 +50,7 @@ public class Moving extends ImageIcon {
 		this.xBoundary = xBoundary;
 		this.yBoundary = yBoundary;
 		img=imgURL;
-	
+
 	}
 	//stone,ball,새 이미지 그리기 : (attack_img)없는 애들 
 	public Moving(URL imgURL,URL attacked,int margin,int xBoundary,int yBoundary,String what) {
@@ -61,13 +62,13 @@ public class Moving extends ImageIcon {
 		this.yBoundary=yBoundary;
 		this.xDirection=1;
 		this.yDirection=1;
-		this.x= (int) (Math.random() * xBoundary/2)+xBoundary/2;
+		this.x= (int) (Math.random() * xBoundary/2)+xBoundary/2-400;
 		this.y= (int) (Math.random() * yBoundary/2+100)+80;
 		this.initX=x;
 		this.initY=y;
 		this.steps=5;
 		img=imgURL;
-		
+
 	}
 
 	//ph포션,파워포션,
@@ -81,11 +82,11 @@ public class Moving extends ImageIcon {
 		this.yDirection = 1;
 		this.xBoundary=1155-margin;
 		this.yBoundary=688-margin;
-		this.x= (int) (Math.random() * xBoundary/2)+xBoundary/2-150;
+		this.x= (int) (Math.random() * xBoundary/2)+xBoundary/2-200;
 		this.y= (int) (Math.random() * yBoundary/2+100)+80;
 		this.margin=margin;
 		img=imgURL;
-	
+
 	}
 	//코인 
 	public Moving(URL imgURL, int margin,int x,int y) {
@@ -112,10 +113,10 @@ public class Moving extends ImageIcon {
 		this.initX=x;
 		this.initY=y;
 		img=imgURL;
-	
+
 
 	}
-	
+
 	public boolean outside() {
 		if(this.x<0)
 			return true;
@@ -174,14 +175,16 @@ public class Moving extends ImageIcon {
 		if (p.distance(p2) <= margin) return true;
 		return false;
 	}
-	
+	public boolean isDie() {
+		return isdie;
+	}
 	public void reset() {
 		x = initX; y= initY;
 	}
 
 	// 해당 모양을 g에 출력해주는 메소드
 	public void draw(Graphics g, ImageObserver io) {
-	((Graphics2D)g).drawImage(this.getImage(), x, y, margin, margin, io);
+		((Graphics2D)g).drawImage(this.getImage(), x, y, margin, margin, io);
 	}
 
 	public void Horizontallymove() {
@@ -205,21 +208,42 @@ public class Moving extends ImageIcon {
 
 	//돌 
 	public void Diaonallymove() {
+		int rand =(int)(Math.random()*2);
+		switch(rand) {
+		case 0:
+			if (xDirection > 0 && x >= xBoundary) {
+				//xDirection = -1;
+			}
+			if (xDirection < 0 && x <= 0) {
+				//xDirection = 1;
+			}
+			x += (xDirection * steps);
 
-		if (xDirection > 0 && x >= xBoundary) {
-			//xDirection = -1;
-		}
-		if (xDirection < 0 && x <= 0) {
-			//xDirection = 1;
-		}
-		x += (xDirection * steps);
+			if (yDirection > 0 && y >= yBoundary) {
+				yDirection = -1;
+			}
+			if (yDirection < 0 && y <= 0) {
+				yDirection = 1;
+			}
+			y += (yDirection * steps);
+			break;
+		case 1 :
+			if (xDirection > 0 && x >= xBoundary) {
+				//xDirection = -1;
+			}
+			if (xDirection < 0 && x <= 0) {
+				//xDirection = 1;
+			}
+			x -= (xDirection * steps);
 
-		if (yDirection > 0 && y >= yBoundary) {
-			yDirection = -1;
+			if (yDirection > 0 && y >= yBoundary) {
+				yDirection = -1;
+			}
+			if (yDirection < 0 && y <= 0) {
+				yDirection = 1;
+			}
+			y -= (yDirection * steps);
+			break;
 		}
-		if (yDirection < 0 && y <= 0) {
-			yDirection = 1;
-		}
-		y += (yDirection * steps);
 	}
 }

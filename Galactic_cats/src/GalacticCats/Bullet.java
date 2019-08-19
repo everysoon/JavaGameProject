@@ -8,14 +8,14 @@ import javax.swing.ImageIcon;
 
 public class Bullet extends ImageIcon {
 	Point pos;
-	int delay;
+	//int delay;
 	int sizeX = 50;
 	int sizeY = 50;
-	int index = 0;
+	
 	public Bullet(URL img,int x,int y) {
 		super(img);
 		pos=new Point(x,y);
-		delay = (int)(Math.random()*2);
+		//delay = (int)(Math.random()*2);
 	}
 	public void Attakcermove() {
 		pos.x-=3;
