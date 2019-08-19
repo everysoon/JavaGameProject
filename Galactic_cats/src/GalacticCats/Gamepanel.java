@@ -216,6 +216,7 @@ public class Gamepanel extends JPanel{
 				g.drawString(playerName,440,360);
 				g.drawString(String.valueOf(score),660,290);
 			}
+		
 		}
 		this.repaint();
 	}
@@ -228,7 +229,7 @@ public class Gamepanel extends JPanel{
 			prepareAttacker();
 			goScore.start();
 			goAnime.start();
-			focus(); //startButton clicked, ButtonListener transform foucus KeyListener 
+			focus(); //startButton clicked, ButtonListener transform focus KeyListener 
 		}
 
 	}
@@ -252,7 +253,7 @@ public class Gamepanel extends JPanel{
 			hero.setImage(hero_flybasic.getImage());
 			setPhbar(ph);
 			AttackerInit();
-			focus();//reStartButton clicked, ButtonListener transform foucus KeyListener 	
+			focus();//reStartButton clicked, ButtonListener transform focus KeyListener 	
 			restart=true;
 		}
 
@@ -428,13 +429,13 @@ public class Gamepanel extends JPanel{
 			if (hero.y >= 0)
 				hero.y -= 10;
 		if(downPushed) 
-			if (hero.y <=xB)
+			if (hero.y <=yB)
 				hero.y += 10;
 		if(leftPushed)
 			if (hero.x >= 0)
 				hero.x -= 10;
 		if(rightPushed)
-			if (hero.x <=yB)
+			if (hero.x <=xB)
 				hero.x += 10;
 	}
 
@@ -551,12 +552,16 @@ public class Gamepanel extends JPanel{
 			newAttacker =  new Moving(getClass().getResource("/Image/blackbird.gif"),
 					getClass().getResource("/Image/blackbird_attacked.gif"),
 					B_MARGIN,xB,yB,"stone");
+			newAttacker.setX((int)(Math.random()*xB/2)+xB/2-400);
+			newAttacker.setY((int)(Math.random()*yB/2+100)+80);
 			newAttacker.setBird(true);
 			break;
 		case 12:
 			newAttacker =  new Moving(getClass().getResource("/Image/redbird.gif"),
 					getClass().getResource("/Image/redbird_attacked.gif"),
 					B_MARGIN,xB,yB,"stone");
+			newAttacker.setX((int)(Math.random()*xB/2)+xB/2-400);
+			newAttacker.setY((int)(Math.random()*yB/2+100)+80);
 			newAttacker.setBird(true);
 			break;
 		case 13:

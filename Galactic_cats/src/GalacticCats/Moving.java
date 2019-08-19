@@ -9,32 +9,32 @@ import java.net.URL;
 import javax.swing.ImageIcon;
 
 public class Moving extends ImageIcon {
-	public int x;				// ¸ğ¾çÀÇ À§Ä¡ ÁÂÇ¥
-	public int y;				// ¸ğ¾çÀÇ À§Ä¡ ÁÂÇ¥
-	private int initX, initY; 	// ÃÊ±â½ÃÀÛ x, yÁÂÇ¥
-	protected int xDirection;
+	public int x,y;				// Image Position coordinates x,y
+	private int initX, initY; 	// Initial start x, y coordinates
+	protected int xDirection; //Direction x,y
 	protected int yDirection;
-	protected int xBoundary; //°æ°èÇ¥½Ã
-	protected int yBoundary; //°æ°èÇ¥½Ã 
+	protected int xBoundary; // Boundary x,y
+	protected int yBoundary; 
 	protected int steps;
-	protected int margin;		// ÀÌ ¸ğ¾çÀÇ ¿µ¿ªÀÌ Æ÷ÇÔµÇ´Â ¿µ¿ªÀ» ³ªÅ¸³»±â À§ÇÔ
-	URL img;
-	URL attack_img;
-	URL attacked_img;
-	URL bullet;
-	boolean bird=false;
-	boolean boom=false;
-	String item;
-	String what;
+	protected int margin;	// Indicates an area that contains an area of â€‹â€‹shape
+	URL img; //character Image
+	URL attack_img; //chracter attack motion Image
+	URL attacked_img; //character attacked motion Image
+	URL bullet; //character bullet Image 
+	String item; // To indicate the power,potion among the items, String variable
+	String what;// To indicate the bomb,bird,stone among the otherAttacker, String variable
+
 	boolean invincible =false;
 	boolean isdie =false; 
+	boolean bird=false;
+	boolean boom=false;
 
 	public Moving(URL imgURL,URL attack_img,URL attacked_img,URL bullet,int x, int y, int margin, int steps, int xBoundary, int yBoundary) {
-		// imgPath : ±×¸² ÆÄÀÏÀÇ °æ·Î¸í
-		// x, y : ÀÌ¹ÌÁöÀÇ ½ÃÀÛ À§Ä¡ ÁÂÇ¥
-		// margin : ÀÌ ÀÌ¹ÌÁöÀÇ ¿µ¿ªÀ» ³ªÅ¸³»´Â ¹üÀ§ (ÀÌ ¿µ¿ª¾È¿¡ ÀÖÀ¸¸é Ãæµ¹ ÇÑ °ÍÀ¸·Î ÆÇ´Ü ÇÏ±â À§ÇÔ) ->ÀÌ¹ÌÁö Å©±â 
-		// steps : ÀÌ¹ÌÁö°¡ ¿òÁ÷ÀÏ¶§ ÀÌµ¿ÇÏ´Â ÁÂÇ¥ ´ÜÀ§
-		// xBoundary, yBoundary : ±×¸²ÀÌ ÀÌµ¿ÇÒ ¼ö ÀÖ´Â ÁÂÇ¥ÀÇ ÃÖ´ë°ª
+		// imgPath : ê·¸ë¦¼ íŒŒì¼ì˜ ê²½ë¡œëª…
+		// x, y : ì´ë¯¸ì§€ì˜ ì‹œì‘ ìœ„ì¹˜ ì¢Œí‘œ
+		// margin : ì´ ì´ë¯¸ì§€ì˜ ì˜ì—­ì„ ë‚˜íƒ€ë‚´ëŠ” ë²”ìœ„ (ì´ ì˜ì—­ì•ˆì— ìˆìœ¼ë©´ ì¶©ëŒ í•œ ê²ƒìœ¼ë¡œ íŒë‹¨ í•˜ê¸° ìœ„í•¨) ->ì´ë¯¸ì§€ í¬ê¸° 
+		// steps : ì´ë¯¸ì§€ê°€ ì›€ì§ì¼ë•Œ ì´ë™í•˜ëŠ” ì¢Œí‘œ ë‹¨ìœ„ (speed)
+		// xBoundary, yBoundary : ê·¸ë¦¼ì´ ì´ë™í•  ìˆ˜ ìˆëŠ” ì¢Œí‘œì˜ ìµœëŒ€ê°’
 		super (imgURL);
 		this.attack_img=attack_img;
 		this.attacked_img=attacked_img;
@@ -52,7 +52,7 @@ public class Moving extends ImageIcon {
 		img=imgURL;
 
 	}
-	//stone,ball,»õ ÀÌ¹ÌÁö ±×¸®±â : (attack_img)¾ø´Â ¾Öµé 
+	//stone,ball,ìƒˆ ì´ë¯¸ì§€ ê·¸ë¦¬ê¸° : (attack_img)ì—†ëŠ” ì• ë“¤ 
 	public Moving(URL imgURL,URL attacked,int margin,int xBoundary,int yBoundary,String what) {
 		super(imgURL);
 		this.attacked_img=attacked;
@@ -62,16 +62,15 @@ public class Moving extends ImageIcon {
 		this.yBoundary=yBoundary;
 		this.xDirection=1;
 		this.yDirection=1;
-		this.x= (int) (Math.random() * xBoundary/2)+xBoundary/2-400;
-		this.y= (int) (Math.random() * yBoundary/2+100)+80;
+		this.x =((int)(Math.random()*xBoundary)+xBoundary);
+		this.y=((int)(Math.random()*yBoundary)+100);
 		this.initX=x;
 		this.initY=y;
 		this.steps=5;
 		img=imgURL;
-
 	}
 
-	//phÆ÷¼Ç,ÆÄ¿öÆ÷¼Ç,
+	//phí¬ì…˜,íŒŒì›Œí¬ì…˜,
 	public Moving(URL imgURL,int margin,String item) {
 		super(imgURL);
 		this.initX=x;
@@ -88,7 +87,7 @@ public class Moving extends ImageIcon {
 		img=imgURL;
 
 	}
-	//ÄÚÀÎ 
+	//ì½”ì¸ 
 	public Moving(URL imgURL, int margin,int x,int y) {
 		this(imgURL,margin,"coin");
 		this.x=x;
@@ -96,8 +95,7 @@ public class Moving extends ImageIcon {
 		img=imgURL;
 
 	}
-	// ½ÃÀÛ À§Ä¡¸¦ ÀÓÀÇÀÇ Æ÷ÀÎÆ®·Î ÁÖ´Â ±¸¼ºÀÚ 
-	//Àûµé (attackÀÌ¹ÌÁöÀÖ´Â¾Öµé)
+	//ì ë“¤ (attackì´ë¯¸ì§€ìˆëŠ”ì• ë“¤)
 	public Moving(URL imgURL,URL attacked_img,URL bullet,int margin, int steps, int xBoundary, int yBoundary) {
 		super(imgURL);
 		this.attack_img=attacked_img;
@@ -108,12 +106,11 @@ public class Moving extends ImageIcon {
 		this.yDirection=1;
 		this.xBoundary=xBoundary;
 		this.yBoundary=yBoundary;
-		x= (int) (Math.random() * xBoundary/2)+xBoundary/2;
+		this.x= (int) (Math.random() * xBoundary/2)+xBoundary/2;
 		this.y= (int) (Math.random() * yBoundary/2+100)+80;
 		this.initX=x;
 		this.initY=y;
 		img=imgURL;
-
 
 	}
 
@@ -134,14 +131,6 @@ public class Moving extends ImageIcon {
 	public void setBird(boolean bird) {
 		this.bird=bird;
 	}
-	public void setX(int x) {
-		this.x = x;
-	}
-
-	public void setY(int y) {
-		this.y = y;
-	}
-
 	public int getX() {
 		return this.x;
 	}
@@ -149,11 +138,12 @@ public class Moving extends ImageIcon {
 	public int getY() {
 		return this.y;
 	}
-
-	public void setMargin(int margin) {
-		this.margin = margin;
+	public void setX(int x) {
+		this.x = x;
 	}
-
+	public void setY(int y) {
+		this.y = y;
+	}
 	public int getMargin() {
 		return margin;
 	}
@@ -169,12 +159,6 @@ public class Moving extends ImageIcon {
 	public URL getBullet() {
 		return bullet;
 	}
-	// ÇÏ³ªÀÇ Á¡ÀÌ ÀÌ ¸ğ¾ç°ú Ãæµ¹ÇÏ¿´´ÂÁö (¸ğ¾çÀÇ margin °Å¸®¾È¿¡ ÀÖ´ÂÁö)¸¦ ÆÇ´ÜÇÏ´Â ÇÔ¼ö
-	public boolean collide (Point p2) {
-		Point p = new Point(this.x, this.y);
-		if (p.distance(p2) <= margin) return true;
-		return false;
-	}
 	public boolean isDie() {
 		return isdie;
 	}
@@ -182,7 +166,13 @@ public class Moving extends ImageIcon {
 		x = initX; y= initY;
 	}
 
-	// ÇØ´ç ¸ğ¾çÀ» g¿¡ Ãâ·ÂÇØÁÖ´Â ¸Ş¼Òµå
+	// í•˜ë‚˜ì˜ ì ì´ ì´ ëª¨ì–‘ê³¼ ì¶©ëŒí•˜ì˜€ëŠ”ì§€ (ëª¨ì–‘ì˜ margin ê±°ë¦¬ì•ˆì— ìˆëŠ”ì§€)ë¥¼ íŒë‹¨í•˜ëŠ” í•¨ìˆ˜
+	public boolean collide (Point p2) {
+		Point p = new Point(this.x, this.y);
+		if (p.distance(p2) <= margin) return true;
+		return false;
+	}
+	// í•´ë‹¹ ëª¨ì–‘ì„ gì— ì¶œë ¥í•´ì£¼ëŠ” ë©”ì†Œë“œ
 	public void draw(Graphics g, ImageObserver io) {
 		((Graphics2D)g).drawImage(this.getImage(), x, y, margin, margin, io);
 	}
@@ -206,44 +196,20 @@ public class Moving extends ImageIcon {
 		}
 	}
 
-	//µ¹ 
+	//ëŒ 
 	public void Diaonallymove() {
-		int rand =(int)(Math.random()*2);
-		switch(rand) {
-		case 0:
-			if (xDirection > 0 && x >= xBoundary) {
-				//xDirection = -1;
-			}
-			if (xDirection < 0 && x <= 0) {
-				//xDirection = 1;
-			}
-			x += (xDirection * steps);
 
-			if (yDirection > 0 && y >= yBoundary) {
-				yDirection = -1;
-			}
-			if (yDirection < 0 && y <= 0) {
-				yDirection = 1;
-			}
-			y += (yDirection * steps);
-			break;
-		case 1 :
-			if (xDirection > 0 && x >= xBoundary) {
-				//xDirection = -1;
-			}
-			if (xDirection < 0 && x <= 0) {
-				//xDirection = 1;
-			}
-			x -= (xDirection * steps);
+		x -= (xDirection * steps);
 
-			if (yDirection > 0 && y >= yBoundary) {
-				yDirection = -1;
-			}
-			if (yDirection < 0 && y <= 0) {
-				yDirection = 1;
-			}
-			y -= (yDirection * steps);
-			break;
+		if (yDirection > 0 && y >= yBoundary) {
+			yDirection = -1;
 		}
+		if (yDirection < 0 && y <= 0) {
+			yDirection = 1;
+		}
+		y += (yDirection * steps);
+
+
 	}
 }
+
